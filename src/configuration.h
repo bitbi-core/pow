@@ -27,36 +27,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #pragma once
+#define BTB_POW 1
 
+#ifdef BTB_POW
 // Cache size in KiB. Must be a power of 2.
-#define RANDOMX_ARGON_MEMORY 262144
+#define RANDOMX_ARGON_MEMORY 262144/8
 
 // Number of Argon2d iterations for Cache initialization.
-#define RANDOMX_ARGON_ITERATIONS 1
+#define RANDOMX_ARGON_ITERATIONS 2
 
 // Number of parallel lanes for Cache initialization.
-#define RANDOMX_ARGON_LANES 1
+#define RANDOMX_ARGON_LANES 2
 
 // Argon2d salt
-#define RANDOMX_ARGON_SALT "CpuRandomX\x03"
+#define RANDOMX_ARGON_SALT "CpuRandomXForBTB.If-bitcoin+failed,Bitbi-would*stand_out!\x03"
 
 // Number of random Cache accesses per Dataset item. Minimum is 2.
-#define RANDOMX_CACHE_ACCESSES 16
+#define RANDOMX_CACHE_ACCESSES 42
 
 // Target latency for SuperscalarHash (in cycles of the reference CPU).
-#define RANDOMX_SUPERSCALAR_LATENCY 100
+#define RANDOMX_SUPERSCALAR_LATENCY 32
 
 // Dataset base size in bytes. Must be a power of 2.
-#define RANDOMX_DATASET_BASE_SIZE 2147483648
+#define RANDOMX_DATASET_BASE_SIZE 2147483648/2
 
 // Dataset extra size. Must be divisible by 64.
-#define RANDOMX_DATASET_EXTRA_SIZE 33554368
+#define RANDOMX_DATASET_EXTRA_SIZE 33554368*11
 
 // Number of instructions in a RandomX program. Must be divisible by 8.
 #define RANDOMX_PROGRAM_SIZE 256
 
 // Number of iterations during VM execution.
-#define RANDOMX_PROGRAM_ITERATIONS 2048
+#define RANDOMX_PROGRAM_ITERATIONS 1888
 
 // Number of chained VM executions per hash.
 #define RANDOMX_PROGRAM_COUNT 8
@@ -65,10 +67,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define RANDOMX_SCRATCHPAD_L3 2097152
 
 // Scratchpad L2 size in bytes. Must be a power of two and less than or equal to RANDOMX_SCRATCHPAD_L3.
-#define RANDOMX_SCRATCHPAD_L2 262144
+#define RANDOMX_SCRATCHPAD_L2 262144 * 2
 
 // Scratchpad L1 size in bytes. Must be a power of two (minimum 64) and less than or equal to RANDOMX_SCRATCHPAD_L2.
-#define RANDOMX_SCRATCHPAD_L1 16384
+#define RANDOMX_SCRATCHPAD_L1 16384 * 4
 
 // Jump condition mask size in bits.
 #define RANDOMX_JUMP_BITS 8
@@ -76,6 +78,58 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Jump condition mask offset in bits. The sum of RANDOMX_JUMP_BITS and RANDOMX_JUMP_OFFSET must not exceed 16.
 #define RANDOMX_JUMP_OFFSET 8
 
+#else 
+
+
+//Cache size in KiB. Must be a power of 2.
+#define RANDOMX_ARGON_MEMORY       262144
+
+//Number of Argon2d iterations for Cache initialization.
+#define RANDOMX_ARGON_ITERATIONS   3
+
+//Number of parallel lanes for Cache initialization.
+#define RANDOMX_ARGON_LANES        1
+
+//Argon2d salt
+#define RANDOMX_ARGON_SALT         "RandomX\x03"
+
+//Number of random Cache accesses per Dataset item. Minimum is 2.
+#define RANDOMX_CACHE_ACCESSES     8
+
+//Target latency for SuperscalarHash (in cycles of the reference CPU).
+#define RANDOMX_SUPERSCALAR_LATENCY   170
+
+//Dataset base size in bytes. Must be a power of 2.
+#define RANDOMX_DATASET_BASE_SIZE  2147483648
+
+//Dataset extra size. Must be divisible by 64.
+#define RANDOMX_DATASET_EXTRA_SIZE 33554368
+
+//Number of instructions in a RandomX program. Must be divisible by 8.
+#define RANDOMX_PROGRAM_SIZE       256
+
+//Number of iterations during VM execution.
+#define RANDOMX_PROGRAM_ITERATIONS 2048
+
+//Number of chained VM executions per hash.
+#define RANDOMX_PROGRAM_COUNT      8
+
+//Scratchpad L3 size in bytes. Must be a power of 2.
+#define RANDOMX_SCRATCHPAD_L3      2097152
+
+//Scratchpad L2 size in bytes. Must be a power of two and less than or equal to RANDOMX_SCRATCHPAD_L3.
+#define RANDOMX_SCRATCHPAD_L2      262144
+
+//Scratchpad L1 size in bytes. Must be a power of two (minimum 64) and less than or equal to RANDOMX_SCRATCHPAD_L2.
+#define RANDOMX_SCRATCHPAD_L1      16384
+
+//Jump condition mask size in bits.
+#define RANDOMX_JUMP_BITS          8
+
+//Jump condition mask offset in bits. The sum of RANDOMX_JUMP_BITS and RANDOMX_JUMP_OFFSET must not exceed 16.
+#define RANDOMX_JUMP_OFFSET        8
+
+#endif
 /*
 Instruction frequencies (per 256 opcodes)
 Total sum of frequencies must be 256
