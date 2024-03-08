@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define RANDOMX_ARGON_SALT "CpuRandomXForBTB.If-bitcoin+failed,Bitbi-would*stand_out!\x03"
 
 // Number of random Cache accesses per Dataset item. Minimum is 2.
-#define RANDOMX_CACHE_ACCESSES 4
+#define RANDOMX_CACHE_ACCESSES 16
 
 // Target latency for SuperscalarHash (in cycles of the reference CPU).
 #define RANDOMX_SUPERSCALAR_LATENCY 170
@@ -64,13 +64,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define RANDOMX_PROGRAM_COUNT 2
 
 // Scratchpad L3 size in bytes. Must be a power of 2.
-#define RANDOMX_SCRATCHPAD_L3 1048576/2
+#define RANDOMX_SCRATCHPAD_L3 1048576*2
 
 // Scratchpad L2 size in bytes. Must be a power of two and less than or equal to RANDOMX_SCRATCHPAD_L3.
-#define RANDOMX_SCRATCHPAD_L2 262144
+#define RANDOMX_SCRATCHPAD_L2 262144*2
 
 // Scratchpad L1 size in bytes. Must be a power of two (minimum 64) and less than or equal to RANDOMX_SCRATCHPAD_L2.
-#define RANDOMX_SCRATCHPAD_L1 16384
+#define RANDOMX_SCRATCHPAD_L1 16384*4
 
 // Jump condition mask size in bits.
 #define RANDOMX_JUMP_BITS 8
