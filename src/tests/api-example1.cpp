@@ -1,5 +1,6 @@
 #include "../randomx.h"
 #include <stdio.h>
+#include "stopwatch.hpp"
 
 int main() {
 	const char myKey[] = "RandomX example key";
@@ -10,9 +11,10 @@ int main() {
 	randomx_cache *myCache = randomx_alloc_cache(flags);
 	randomx_init_cache(myCache, &myKey, sizeof myKey);
 	randomx_vm *myMachine = randomx_create_vm(flags, myCache, NULL);
-
-	randomx_calculate_hash(myMachine, &myInput, sizeof myInput, hash);
-
+	Stopwatch sw(true);
+	for (int i = 0; i < 100; i++)
+		randomx_calculate_hash(myMachine, &myInput, sizeof myInput, hash);
+	printf("verify time: in %f s/hash\n", sw.getElapsed() / 100);
 	randomx_destroy_vm(myMachine);
 	randomx_release_cache(myCache);
 
