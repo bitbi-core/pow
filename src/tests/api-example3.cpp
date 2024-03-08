@@ -48,7 +48,7 @@ int main()
         work.PowHash(myKey, sizeof(myKey), myInput, sizeof(myInput), (unsigned char *)hash);
     }
 
-    std::cout << "Memory initialized in " << sw.getElapsed() / 100 << " s" << std::endl;
+    std::cout << "verify speed: " << sw.getElapsed() / 100 << " s /hash" << std::endl;
     for (unsigned i = 0; i < RANDOMX_HASH_SIZE; ++i)
         printf("%02x", hash[i] & 0xff);
 
