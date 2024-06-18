@@ -78,12 +78,16 @@ int main() {
 	//std::cout << "Allocating randomx_cache..." << std::endl;
 	cache = randomx_alloc_cache(RANDOMX_FLAG_DEFAULT);
 
-	runTest("Cache initialization", RANDOMX_ARGON_ITERATIONS == 3 && RANDOMX_ARGON_LANES == 1 && RANDOMX_ARGON_MEMORY == 262144 && stringsEqual(RANDOMX_ARGON_SALT, "RandomX\x03"),	[]() {
+	runTest("Cache initialization", RANDOMX_ARGON_ITERATIONS == 1 && RANDOMX_ARGON_LANES == 1 && RANDOMX_ARGON_MEMORY == 262144 && stringsEqual(RANDOMX_ARGON_SALT, "CpuRandomXForBTB.If-bitcoin+failed,Bitbi-would*stand_out!\x03"),	[]() {
 		initCache("test key 000");
 		uint64_t* cacheMemory = (uint64_t*)cache->memory;
-		assert(cacheMemory[0] == 0x191e0e1d23c02186);
-		assert(cacheMemory[1568413] == 0xf1b62fe6210bf8b1);
-		assert(cacheMemory[33554431] == 0x1f47f056d05cd99b);
+		// print cacheMemory[0] cacheMemory[1568413]， and cacheMemory[33554431] for reference
+		std::cout << "cacheMemory[0] = " << std::hex << cacheMemory[0] << std::endl;
+		std::cout << "cacheMemory[1568413] = " << std::hex << cacheMemory[1568413] << std::endl;
+		std::cout << "cacheMemory[33554431] = " << std::hex << cacheMemory[33554431] << std::endl;
+		assert(cacheMemory[0] == 0x276909e55acfc943);
+		assert(cacheMemory[1568413] == 0xe69bddeb764ae0c4);
+		assert(cacheMemory[33554431] == 0xc56986cd416ae66c);
 	});
 
 	runTest("SuperscalarHash generator", RANDOMX_SUPERSCALAR_LATENCY == 170, []() {
@@ -1086,7 +1090,7 @@ int main() {
 		rx_set_rounding_mode(RoundToNearest);
 		char hash[RANDOMX_HASH_SIZE];
 		calcStringHash("test key 000", "Lorem ipsum dolor sit amet", &hash);
-		assert(equalsHex(hash, "300a0adb47603dedb42228ccb2b211104f4da45af709cd7547cd049e9489c969"));
+		assert(equalsHex(hash, "503073ab8d8e470804a44fa1a400d3e6df85bcf5edaaf0579d73ae5cc5745cda"));
 		assert(rx_get_rounding_mode() == RoundToNearest);
 	});
 

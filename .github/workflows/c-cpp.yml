@@ -2,7 +2,7 @@ name: C/C++ CI
 
 on:
   push:
-    branches: [ master ]
+    tags: [ "v*.*.*" ]
   pull_request:
 
 jobs:
@@ -17,11 +17,11 @@ jobs:
           - {arch: x86_64, branch: latest-stable}
           - {arch: x86, branch: latest-stable}
           - {arch: aarch64, branch: latest-stable}
-          - {arch: armhf, branch: latest-stable}
-          - {arch: armv7, branch: latest-stable}
-          - {arch: ppc64le, branch: latest-stable}
-          - {arch: riscv64, branch: edge}
-          - {arch: s390x, branch: latest-stable}
+          # - {arch: armhf, branch: latest-stable}
+          # - {arch: armv7, branch: latest-stable}
+          # - {arch: ppc64le, branch: latest-stable}
+          # - {arch: riscv64, branch: edge}
+          # - {arch: s390x, branch: latest-stable}
 
     steps:
     - name: Setup Alpine Linux
@@ -36,7 +36,7 @@ jobs:
         apk add git cmake gcc g++ make
 
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: true
 
@@ -52,6 +52,17 @@ jobs:
       shell: alpine.sh {0}
       run: |
         build/randomx-tests
+
+    - name: Compress artifacts
+      run: |
+        tar -czvf alpine-${{ matrix.config.arch }}.tar.gz -C ./build librandomx.a randomx-benchmark
+
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: alpine-${{ matrix.config.arch }}
+        path: ./alpine-${{ matrix.config.arch }}.tar.gz
 
   build-ubuntu:
 
@@ -72,7 +83,7 @@ jobs:
         sudo apt install -y git build-essential cmake ${{ matrix.config.c }} ${{ matrix.config.cpp }}
 
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: true
 
@@ -87,6 +98,17 @@ jobs:
       run: |
         build/randomx-tests
 
+    - name: Compress artifacts
+      run: |
+        tar -czvf ubuntu-${{ matrix.config.os }}.tar.gz -C ./build librandomx.a randomx-benchmark
+
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ubuntu-${{ matrix.config.os }}
+        path: ./ubuntu-${{ matrix.config.os }}.tar.gz
+
   build-windows-msys2:
 
     timeout-minutes: 15
@@ -96,7 +118,7 @@ jobs:
       matrix:
         config:
           - {c: "gcc", cxx: "g++"}
-          - {c: "clang", cxx: "clang++"}
+          # - {c: "clang", cxx: "clang++"}
 
     defaults:
       run:
@@ -104,7 +126,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
 
@@ -125,38 +147,47 @@ jobs:
       run: |
         build/randomx-tests.exe
 
-  build-windows-msbuild:
+    - name: Compress artifacts
+      run: |
+        tar -czvf windows-msys2-${{ matrix.config.c }}.tar.gz -C ./build librandomx.a randomx-benchmark
 
-    timeout-minutes: 5
-    runs-on: windows-${{ matrix.config.os }}
-
-    strategy:
-      matrix:
-        config:
-          - {arch: x64, os: 2019, vs: Visual Studio 16 2019, msbuild: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\amd64\\"}
-          - {arch: x64, os: 2022, vs: Visual Studio 17 2022, msbuild: "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\Msbuild\\Current\\Bin\\amd64\\"}
-          - {arch: Win32, os: 2019, vs: Visual Studio 16 2019, msbuild: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\"}
-          - {arch: Win32, os: 2022, vs: Visual Studio 17 2022, msbuild: "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\Msbuild\\Current\\Bin\\"}
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
       with:
-        submodules: recursive
+        name: windows-msys2-${{ matrix.config.c }}
+        path: ./windows-msys2-${{ matrix.config.c }}.tar.gz
+  # build-windows-msbuild:
 
-    - name: Setup cmake
-      uses: lukka/get-cmake@latest
+  #   timeout-minutes: 5
+  #   runs-on: windows-${{ matrix.config.os }}
 
-    - name: Build RandomX
-      run: |
-        mkdir build
-        cd build
-        cmake .. -G "${{ matrix.config.vs }}" -A ${{ matrix.config.arch }}
-        & "${{ matrix.config.msbuild }}msbuild" -v:m /m /p:Configuration=Release randomx-tests.vcxproj
+  #   strategy:
+  #     matrix:
+  #       config:
+  #         - {arch: x64, os: 2019, vs: Visual Studio 16 2019, msbuild: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\amd64\\"}
+  #         - {arch: x64, os: 2022, vs: Visual Studio 17 2022, msbuild: "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\Msbuild\\Current\\Bin\\amd64\\"}
+  #         - {arch: Win32, os: 2019, vs: Visual Studio 16 2019, msbuild: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\"}
+  #         - {arch: Win32, os: 2022, vs: Visual Studio 17 2022, msbuild: "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\Msbuild\\Current\\Bin\\"}
 
-    - name: Run tests
-      run: |
-        build/Release/randomx-tests.exe
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v4
+  #     with:
+  #       submodules: recursive
+
+  #   - name: Setup cmake
+  #     uses: lukka/get-cmake@latest
+
+  #   - name: Build RandomX
+  #     run: |
+  #       mkdir build
+  #       cd build
+  #       cmake .. -G "${{ matrix.config.vs }}" -A ${{ matrix.config.arch }}
+  #       & "${{ matrix.config.msbuild }}msbuild" -v:m /m /p:Configuration=Release randomx-tests.vcxproj
+
+  #   - name: Run tests
+  #     run: |
+  #       build/Release/randomx-tests.exe
 
   build-macos:
 
@@ -165,11 +196,11 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-11, macos-12, macos-13]
+        os: [macos-11, macos-12, macos-13, macos-14]
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
 
@@ -187,40 +218,113 @@ jobs:
       run: |
         build/randomx-tests
 
-  build-freebsd:
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: macos-artifact
+        path: |
+          ./build/librandomx.a
+          ./build/randomx-benchmark
 
-    timeout-minutes: 15
-    runs-on: ${{ matrix.os.host }}
+    - name: Compress artifacts
+      run: |
+        tar -czvf macos-${{ matrix.os }}.tar.gz -C ./build librandomx.a randomx-benchmark
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: macos-${{ matrix.os }}
+        path: ./macos-${{ matrix.os }}.tar.gz
+
+  build-android:
+
+    timeout-minutes: 5
+    runs-on: ubuntu-22.04
 
     strategy:
       matrix:
-        os:
-          - name: freebsd
-            architecture: x86-64
-            version: '13.2'
-            host: ubuntu-22.04
-
-          - name: freebsd
-            architecture: arm64
-            version: '13.2'
-            host: ubuntu-22.04
+        config:
+          - {api_level: 23, ndk_version: 24.0.8215888, abi: arm64-v8a}
 
     steps:
+    - name: Install dependencies
+      run: |
+        sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+        sudo apt update
+        sudo apt install -y git build-essential cmake unzip openjdk-17-jdk
+        sudo update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+        ANDROID_TOOLS_PATH=${HOME}/sdk-sources/android-tools.zip
+        mkdir -p ${HOME}/sdk-sources
+        ANDROID_TOOLS_URL=https://googledownloads.cn/android/repository/commandlinetools-linux-11076708_latest.zip
+        curl --location --fail "${ANDROID_TOOLS_URL}" -o "$ANDROID_TOOLS_PATH"
+        ANDROID_HOME="${HOME}/SDKs/android"
+        mkdir -p "$ANDROID_HOME"
+        unzip -o "$ANDROID_TOOLS_PATH" -d "$ANDROID_HOME"
+        ANDROID_BUILD_TOOLS_VERSION=28.0.3
+        ANDROID_API_LEVEL=${{ matrix.config.api_level }}
+        ANDROID_NDK_VERSION=${{ matrix.config.ndk_version }}
+        JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+        yes | "${ANDROID_HOME}"/cmdline-tools/bin/sdkmanager --sdk_root="${ANDROID_HOME}" --install "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" "platform-tools" "platforms;android-${ANDROID_API_LEVEL}" "ndk;${ANDROID_NDK_VERSION}"
+        ls -l "${ANDROID_HOME}"
+
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
-        submodules: recursive
+        submodules: true
 
     - name: Build RandomX
-      uses: cross-platform-actions/action@v0.19.0
+      run: |
+        mkdir build
+        cd build
+        ANDROID_API_LEVEL=${{ matrix.config.api_level }}
+        ANDROID_NDK_VERSION=${{ matrix.config.ndk_version }}
+        ANDROID_NDK_HOME="${HOME}/SDKs/android/ndk/${ANDROID_NDK_VERSION}"
+        ANDROID_ABI=${{ matrix.config.abi }}
+        ANDROID_PLATFORM=android-${ANDROID_API_LEVEL}
+        cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake  -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-23 ..
+        make -j$(nproc)
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
       with:
-        operating_system: ${{ matrix.os.name }}
-        architecture: ${{ matrix.os.architecture }}
-        version: ${{ matrix.os.version }}
-        shell: bash
-        run: |
-          sudo pkg install -y cmake
-          mkdir build && cd build
-          cmake ..
-          make -j2
-          ./randomx-tests
+        name: android-artifact
+        path: |
+          ./build/librandomx.a
+          ./build/randomx-benchmark
+
+    - name: Compress artifacts
+      run: |
+        tar -czvf android-${{ matrix.config.abi }}.tar.gz -C ./build librandomx.a randomx-benchmark
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-${{ matrix.config.abi }}
+        path: ./android-${{ matrix.config.abi }}.tar.gz
+        
+
+  create-release:
+    needs: [build-alpine, build-ubuntu, build-windows-msys2, build-macos, build-android]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        
+      - name: Display structure of downloaded files
+        run: ls -R
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            alpine-*/*
+            ubuntu-*/*
+            windows-msys2-*/*
+            macos-*/macos-*.tar.gz
+            android-*/*
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
