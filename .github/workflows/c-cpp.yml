@@ -55,7 +55,10 @@ jobs:
 
     - name: Compress artifacts
       run: |
-        tar -czvf alpine-${{ matrix.config.arch }}.tar.gz -C ./build librandomx.a randomx-benchmark
+        mkdir include lib
+        cp -r src/*.h include
+        cp build/librandomx.a lib
+        tar -czvf alpine-${{ matrix.config.arch }}.tar.gz include lib build/randomx-benchmark
 
 
     - name: Upload artifact
@@ -100,7 +103,10 @@ jobs:
 
     - name: Compress artifacts
       run: |
-        tar -czvf ubuntu-${{ matrix.config.os }}.tar.gz -C ./build librandomx.a randomx-benchmark
+        mkdir include lib
+        cp -r src/*.h include
+        cp build/librandomx.a lib
+        tar -czvf ubuntu-${{ matrix.config.os }}.tar.gz lib include build/randomx-benchmark
 
 
     - name: Upload artifact
@@ -149,7 +155,10 @@ jobs:
 
     - name: Compress artifacts
       run: |
-        tar -czvf windows-msys2-${{ matrix.config.c }}.tar.gz -C ./build librandomx.a randomx-benchmark
+        mkdir include lib
+        cp -r src/*.h include
+        cp build/librandomx.a lib
+        tar -czvf windows-msys2-${{ matrix.config.c }}.tar.gz lib include build/randomx-benchmark
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
@@ -218,17 +227,20 @@ jobs:
       run: |
         build/randomx-tests
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: macos-artifact
-        path: |
-          ./build/librandomx.a
-          ./build/randomx-benchmark
+    # - name: Upload artifact
+    #   uses: actions/upload-artifact@v2
+    #   with:
+    #     name: macos-artifact
+    #     path: |
+    #       ./build/librandomx.a
+    #       ./build/randomx-benchmark
 
     - name: Compress artifacts
       run: |
-        tar -czvf macos-${{ matrix.os }}.tar.gz -C ./build librandomx.a randomx-benchmark
+        mkdir include lib
+        cp -r src/*.h include
+        cp build/librandomx.a lib
+        tar -czvf macos-${{ matrix.os }}.tar.gz lib include build/randomx-benchmark
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
@@ -284,17 +296,20 @@ jobs:
         cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake  -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-23 ..
         make -j$(nproc)
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: android-artifact
-        path: |
-          ./build/librandomx.a
-          ./build/randomx-benchmark
+    # - name: Upload artifact
+    #   uses: actions/upload-artifact@v2
+    #   with:
+    #     name: android-artifact
+    #     path: |
+    #       ./build/librandomx.a
+    #       ./build/randomx-benchmark
 
     - name: Compress artifacts
       run: |
-        tar -czvf android-${{ matrix.config.abi }}.tar.gz -C ./build librandomx.a randomx-benchmark
+        mkdir include lib
+        cp -r src/*.h include
+        cp build/librandomx.a lib
+        tar -czvf android-${{ matrix.config.abi }}.tar.gz include lib build/randomx-benchmark
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
