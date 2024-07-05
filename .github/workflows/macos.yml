@@ -27,9 +27,9 @@ jobs:
 
     - name: Build RandomX
       run: |
-        arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+        arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)";
         arch -x86_64 which brew
-        arch -x86_64 /usr/local/bin/brew install llvm cmake
+        arch -x86_64 /usr/local/bin/brew install llvm cmake;
         export PATH="/usr/local/opt/llvm/bin:$PATH"
         export LDFLAGS="-L/usr/local/opt/llvm/lib -L/usr/local/opt/llvm/lib/c++ -Wl,-rpath,/usr/local/opt/llvm/lib/c++"
         export CPPFLAGS="-I/usr/local/opt/llvm/include"
