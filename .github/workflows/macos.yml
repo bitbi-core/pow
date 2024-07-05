@@ -30,10 +30,19 @@ jobs:
         arch -x86_64 /usr/bin/env bash
         bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         HOMEBREW_NO_AUTO_UPDATE=1 brew install cmake llvm
+        source ~/.bash_profile
+        export LDFLAGS="-L/opt/homebrew/opt/llvm/lib"
+        export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
+        export CC="/opt/homebrew/opt/llvm/bin/clang"
+        export CXX="/opt/homebrew/opt/llvm/bin/clang++"
         mkdir build
-        cd build
-        cmake -DARCH=x86_64  ..
-        make -j3
+        cmake -Bbuild -H. \
+            -DCMAKE_C_COMPILER=$CC \
+            -DCMAKE_CXX_COMPILER=$CXX \
+            -DCMAKE_C_FLAGS="-target x86_64-apple-darwin $CPPFLAGS $LDFLAGS" \
+            -DCMAKE_CXX_FLAGS="-target x86_64-apple-darwin $CPPFLAGS $LDFLAGS" \
+            -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS"
+        cmake --build build --config Release
 
     - name: Run tests
       run: |
