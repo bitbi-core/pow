@@ -1,0 +1,61 @@
+name: C/C++ CI
+
+on:
+  push:
+    # tags: [ "v*.*.*" ]
+    branches: ["macos"]
+  pull_request:
+
+jobs:
+  
+
+  build-macos:
+
+    timeout-minutes: 5
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ macos-14]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+
+    - name: Build RandomX
+      run: |
+        arch -x86_64 /usr/bin/env bash
+        bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        HOMEBREW_NO_AUTO_UPDATE=1 brew install cmake llvm
+        mkdir build
+        cd build
+        cmake -DARCH=x86_64 -DCMAKE_OSX_ARCHITECTURES=x86_64 ..
+        make -j3
+
+    - name: Run tests
+      run: |
+        lipo -info build/randomx-tests
+
+    # - name: Upload artifact
+    #   uses: actions/upload-artifact@v2
+    #   with:
+    #     name: macos-artifact
+    #     path: |
+    #       ./build/librandomx.a
+    #       ./build/randomx-benchmark
+
+    - name: Compress artifacts
+      run: |
+        mkdir include lib
+        cp -r src/*.h include
+        cp build/librandomx.a lib
+        tar -czvf macos-${{ matrix.os }}.tar.gz lib include build/randomx-benchmark
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: macos-${{ matrix.os }}
+        path: ./macos-${{ matrix.os }}.tar.gz
