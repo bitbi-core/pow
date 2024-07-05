@@ -30,19 +30,19 @@ jobs:
         arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
         arch -x86_64 which brew
         arch -x86_64 /usr/local/bin/brew install llvm cmake
-        source ~/.bash_profile
-        export LDFLAGS="-L/opt/homebrew/opt/llvm/lib"
-        export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
-        export CC="/opt/homebrew/opt/llvm/bin/clang"
-        export CXX="/opt/homebrew/opt/llvm/bin/clang++"
+        export PATH="/usr/local/opt/llvm/bin:$PATH"
+        export LDFLAGS="-L/usr/local/opt/llvm/lib -L/usr/local/opt/llvm/lib/c++ -Wl,-rpath,/usr/local/opt/llvm/lib/c++"
+        export CPPFLAGS="-I/usr/local/opt/llvm/include"
         mkdir build
-        cmake -Bbuild -H. \
-            -DCMAKE_C_COMPILER=$CC \
-            -DCMAKE_CXX_COMPILER=$CXX \
-            -DCMAKE_C_FLAGS="-target x86_64-apple-darwin $CPPFLAGS $LDFLAGS" \
-            -DCMAKE_CXX_FLAGS="-target x86_64-apple-darwin $CPPFLAGS $LDFLAGS" \
-            -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS"
-        cmake --build build --config Release
+        cd build
+        cmake .. \
+            -DCMAKE_SYSTEM_NAME=Darwin \
+            -DCMAKE_SYSTEM_PROCESSOR=x86_64 \
+            -DCMAKE_C_COMPILER=/usr/local/opt/llvm/bin/clang \
+            -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++ \
+            -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+            -DCMAKE_EXE_LINKER_FLAGS="-L/usr/local/opt/llvm/lib/c++ -Wl,-rpath,/usr/local/opt/llvm/lib/c++"
+        make VERBOSE=1
 
     - name: Run tests
       run: |
