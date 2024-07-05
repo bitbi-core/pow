@@ -32,7 +32,7 @@ jobs:
         HOMEBREW_NO_AUTO_UPDATE=1 brew install cmake llvm
         mkdir build
         cd build
-        cmake -DARCH=x86_64 -DCMAKE_OSX_ARCHITECTURES=x86_64 ..
+        cmake -DARCH=x86_64  ..
         make -j3
 
     - name: Run tests
